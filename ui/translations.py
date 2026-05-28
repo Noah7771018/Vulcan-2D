@@ -327,6 +327,170 @@ STRINGS = {
         "zh": "界面设置",
         "en": "Interface Settings",
     },
+    # ── Experiment Data tab ──
+    "exp_tab_title": {
+        "zh": "实验数据分析",
+        "en": "Experiment Data Analysis",
+    },
+    "exp_tab_caption": {
+        "zh": "h-BN 1T1M 忆阻器 — Nature 2023 (Zhu, Pazos et al.)",
+        "en": "h-BN 1T1M Memristor — Nature 2023 (Zhu, Pazos et al.)",
+    },
+    "exp_metric_set_cycles": {
+        "zh": "Set 周期数",
+        "en": "Set cycles",
+    },
+    "exp_metric_erase_cycles": {
+        "zh": "Erase 周期数",
+        "en": "Erase cycles",
+    },
+    "exp_metric_v_sweep": {
+        "zh": "电压扫描",
+        "en": "V sweep",
+    },
+    "exp_metric_i_range": {
+        "zh": "电流范围 (Set)",
+        "en": "I range (Set)",
+    },
+    "exp_metric_on_off": {
+        "zh": "开关比",
+        "en": "On/Off ratio",
+    },
+    "exp_metric_points": {
+        "zh": "点/周期",
+        "en": "Points/cycle",
+    },
+    "exp_tab_fitting": {
+        "zh": "模型拟合",
+        "en": "Model Fitting",
+    },
+    "exp_tab_heatmap": {
+        "zh": "变异性热力图",
+        "en": "Variability Heatmap",
+    },
+    "exp_tab_erase": {
+        "zh": "擦除数据",
+        "en": "Erase Data",
+    },
+    "exp_fitting_title": {
+        "zh": "界面切换模型拟合",
+        "en": "Interface-Switching Model Fit",
+    },
+    "exp_model_eq_title": {
+        "zh": "模型公式",
+        "en": "Model Equations",
+    },
+    "exp_state_var": {
+        "zh": "**状态变量** $s \\in [0,1]$（0=HRS，1=LRS）：",
+        "en": "**State variable** $s \\in [0,1]$ (0=HRS, 1=LRS):",
+    },
+    "exp_sigma_caption": {
+        "zh": "其中 $\\sigma(x) = 1/(1+e^{-k \\cdot x})$",
+        "en": "where $\\sigma(x) = 1/(1+e^{-k \\cdot x})$",
+    },
+    "exp_barrier_label": {
+        "zh": "**势垒调制：**",
+        "en": "**Barrier modulation:**",
+    },
+    "exp_current_label": {
+        "zh": "**忆阻器电流**（热电子发射）：",
+        "en": "**Memristor current** (thermionic emission):",
+    },
+    "exp_compliance_label": {
+        "zh": "**晶体管限流**（1T1M 软饱和）：",
+        "en": "**Transistor compliance** (1T1M soft limit):",
+    },
+    "exp_loss_label": {
+        "zh": "**损失函数**（对数空间 MSE）：",
+        "en": "**Loss function** (log-space MSE):",
+    },
+    "exp_params_label": {
+        "zh": "10 个自由参数：$\\phi_{B0}, \\phi_{B,\\min}, n, I_0, k_{\\text{set}}, k_{\\text{reset}}, V_{\\text{set,th}}, V_{\\text{reset,th}}, k, I_{\\text{sat}}$",
+        "en": "10 free parameters: $\\phi_{B0}, \\phi_{B,\\min}, n, I_0, k_{\\text{set}}, k_{\\text{reset}}, V_{\\text{set,th}}, V_{\\text{reset,th}}, k, I_{\\text{sat}}$",
+    },
+    "exp_run_fit_btn": {
+        "zh": "运行拟合",
+        "en": "Run Fit",
+    },
+    "exp_fitting_hint": {
+        "zh": "点击 **运行拟合** 优化参数。",
+        "en": "Click **Run Fit** to optimize parameters.",
+    },
+    "exp_fitted_params": {
+        "zh": "**拟合参数：**",
+        "en": "**Fitted Parameters:**",
+    },
+    "exp_fit_mse": {
+        "zh": "MSE (log10)",
+        "en": "MSE (log10)",
+    },
+    "exp_fit_time": {
+        "zh": "拟合耗时",
+        "en": "Fit time",
+    },
+    "exp_fit_running": {
+        "zh": "正在拟合模型参数（约需 1-2 分钟）...",
+        "en": "Fitting model parameters (this may take 1-2 minutes)...",
+    },
+    "exp_fit_waiting": {
+        "zh": "点击 **运行拟合** 以用实验数据校准模型。",
+        "en": "Press **Run Fit** to calibrate the model against experimental data.",
+    },
+    "exp_overview_title": {
+        "zh": "实验 I-V：全部 Set 周期（h-BN 1T1M）",
+        "en": "Experimental I-V: All Set Cycles (h-BN 1T1M)",
+    },
+    "exp_fit_compare_title": {
+        "zh": "模型拟合 vs 实验",
+        "en": "Model Fit vs Experiment",
+    },
+    "exp_mean_label": {
+        "zh": "实验（均值）",
+        "en": "Experiment (mean)",
+    },
+    "exp_model_label": {
+        "zh": "模型（拟合）",
+        "en": "Model (fitted)",
+    },
+    "exp_current_ua": {
+        "zh": "电流 [µA]",
+        "en": "Current [µA]",
+    },
+    "exp_heatmap_title": {
+        "zh": "周期间变异性热力图（Set）",
+        "en": "Cycle-to-Cycle Variability Heatmap (Set)",
+    },
+    "exp_heatmap_analysis": {
+        "zh": """
+        **变异性分析**：热力图展示了全部 53 个 Set 周期的对数电流变化。主要特征：
+        - **HRS 区**（低电压）：变异性小，原始态稳定
+        - **过渡区**（~1-3V）：变异性最大，开关起始点随机
+        - **LRS 区**（高电压）：变异性中等，被顺应限流饱和
+        """,
+        "en": """
+        **Variability Analysis**: The heatmap shows the log-scale current across
+        all 53 set cycles. Key observations:
+        - **HRS region** (low V): Low variability, stable pristine state
+        - **Transition region** (~1-3V): Highest variability, stochastic switching onset
+        - **LRS region** (high V): Moderate variability, compliance-limited saturation
+        """,
+    },
+    "exp_erase_title": {
+        "zh": "擦除（Reset）扫描 — 0 → -1.7V → 0",
+        "en": "Erase (Reset) Sweeps — 0 → -1.7V → 0",
+    },
+    "exp_erase_plot_title": {
+        "zh": "擦除 I-V：全部 Reset 周期（53 个）",
+        "en": "Erase I-V: Reset Cycles (all 53)",
+    },
+    "exp_data_not_found": {
+        "zh": "未找到实验数据于：",
+        "en": "Experimental data not found at: ",
+    },
+    "exp_data_hint": {
+        "zh": "请将 Nature h-BN 数据集文件（1T1M写入.xlsx, 1T1M擦除.xlsx）放入上述文件夹。",
+        "en": "Place the Nature h-BN dataset files (1T1M写入.xlsx, 1T1M擦除.xlsx) in the folder above.",
+    },
 }
 
 

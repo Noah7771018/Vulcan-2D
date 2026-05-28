@@ -1,14 +1,19 @@
-"""Physical constants used across VULCAN-2D."""
+"""VULCAN-2D 物理常数与材料默认参数。
 
-# Fundamental constants
-Q_E = 1.602176634e-19       # Elementary charge [C]
-K_B = 1.380649e-23           # Boltzmann constant [J/K]
-H_P = 6.62607015e-34         # Planck constant [J·s]
-EPS0 = 8.854187817e-12       # Vacuum permittivity [F/m]
-G0 = 2 * Q_E**2 / H_P        # Conductance quantum [S] ≈ 77.5 µS
+所有常数使用 SI 单位。
+"""
 
-# Material defaults (h-BN)
-DEFAULT_EPS_R = 4.0          # Relative permittivity of h-BN
-DEFAULT_THICKNESS = 5e-9     # Default h-BN thickness [m] (5 nm)
-DEFAULT_GAP = 3.0 * Q_E      # Band gap energy [J] (~3 eV for h-BN)
-DEFAULT_THERMAL_COND = 30.0  # Thermal conductivity [W/(m·K)] for h-BN
+# ── 基本物理常数 ──
+Q_E   = 1.602176634e-19    # 基本电荷 [C]
+K_B   = 1.380649e-23        # 玻尔兹曼常数 [J/K]
+H_P   = 6.62607015e-34      # 普朗克常数 [J·s]
+EPS0  = 8.854187817e-12     # 真空介电常数 [F/m]
+
+# ── 导出常数 ──
+G0    = 2 * Q_E**2 / H_P    # 电导量子 ≈ 77.5 µS (Landauer 公式)
+
+# ── h-BN 默认材料参数 ──
+DEFAULT_EPS_R       = 4.0            # 相对介电常数 (h-BN 面外)
+DEFAULT_THICKNESS   = 5e-9           # 默认 h-BN 厚度 [m] (5 nm)
+DEFAULT_GAP         = 3.0 * Q_E      # h-BN 带隙 [J] (~3 eV)
+DEFAULT_THERMAL_COND = 30.0          # h-BN 热导率 [W/(m·K)]

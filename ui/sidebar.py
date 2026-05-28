@@ -1,4 +1,14 @@
-"""Sidebar parameter controls for VULCAN-2D."""
+"""侧边栏参数控制面板。
+
+折叠面板结构:
+  1. 界面设置 (语言切换)
+  2. 器件结构 (材料、厚度、电极)
+  3. 细丝参数 (半径、势垒、QPC 通道数...)
+  4. 电学条件 (扫描电压、限流、循环数...)
+  5. 变异性 (C2C/D2D 噪声开关和幅度)
+  6. 热学设置 (热阻、热容)
+  7. 运行按钮
+"""
 
 from __future__ import annotations
 import streamlit as st
@@ -7,13 +17,17 @@ from ui.translations import t, toggle_language
 
 
 def build_sidebar() -> dict:
-    """Render sidebar controls and return parameter dict."""
+    """渲染侧边栏控件，返回完整参数字典。
+
+    所有参数使用 SI 单位 (m, A, J, K 等)。
+    用户界面显示工程单位 (nm, eV, mA 等)，在存入 params 前转换。
+    """
     st.sidebar.title(t("app_title"))
     st.sidebar.caption(t("sidebar_subtitle"))
 
     params: dict = {}
 
-    # ── Language ──
+    # ── 语言切换 ──
     with st.sidebar.expander(t("lang_setting_group"), expanded=False):
         cur_lang = st.session_state.get("lang", "zh")
         lang_display = f"{'中文' if cur_lang == 'zh' else 'English'} → {'English' if cur_lang == 'zh' else '中文'}"

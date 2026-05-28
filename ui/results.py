@@ -1,4 +1,9 @@
-"""Results display panel for VULCAN-2D."""
+"""结果展示面板 —— 指标卡片和原始数据。
+
+渲染 5+2 个指标卡片:
+  第一行: V_set, V_reset, R_LRS, R_HRS, On/Off ratio
+  第二行: 最高细丝温度, 仿真耗时
+"""
 
 from __future__ import annotations
 import streamlit as st
@@ -8,12 +13,16 @@ from ui.translations import t
 
 
 def render_metric_cards(results: dict) -> None:
-    """Display key metrics in a row of cards."""
+    """显示仿真关键指标卡片。
+
+    从 results['metrics'][0] 获取第一个周期的指标。
+    多周期时，V_set 副标题显示标准差。
+    """
     metrics = results.get("metrics", [])
     if not metrics:
         return
 
-    m = metrics[0]
+    m = metrics[0]  # 第一周期
 
     cols = st.columns(5)
 
