@@ -43,6 +43,33 @@ npm run dev               # → http://localhost:5173
 The UI shows "engine ✓" when connected. `npm run electron` packages the desktop window
 (point it at a running engine).
 
+## Desktop app (send to others)
+
+Builds a double-click app with the Python engine bundled as a sidecar — recipients
+need no Python, Node, or terminal.
+
+```bash
+npm run dist:mac     # → release/VULCAN-2D-<ver>-arm64.dmg   (Apple Silicon)
+npm run dist:win     # → Windows installer (must be run ON Windows)
+```
+
+Pipeline: `scripts/build_engine.sh` (PyInstaller → a numpy-only engine binary, no raw
+data inside) → `vite build` → electron-builder (bundles the engine as `extraResources`;
+`electron/main.cjs` spawns it on launch and kills it on quit) → `scripts/afterPack.cjs`
+ad-hoc code-signs the app (required for Apple Silicon).
+
+Notes for recipients:
+- The app is **ad-hoc signed but NOT Apple-notarized** (no paid Developer ID). Any copy
+  received via download / WeChat / AirDrop gets a quarantine flag, so the first open shows
+  *"Apple cannot verify…"*. To open it (once):
+  - **Terminal:** `xattr -dr com.apple.quarantine /Applications/VULCAN-2D.app`, then double-click; **or**
+  - **GUI (macOS 15/26):** try to open → click *Done* → **System Settings → Privacy & Security**
+    → **Open Anyway** → confirm. (On macOS 15+, the old *right-click → Open* no longer bypasses this.)
+  - To remove the prompt entirely, the app must be **Apple-notarized** (paid Developer ID) —
+    wire signing+notarization into the build if the group has an account.
+- Builds are per-platform: the macOS arm64 `.dmg` won't run on Intel Macs or Windows —
+  build those on the respective OS.
+
 ## What the simulator does
 
 - **I–V · model vs measured** — the model's SET / RESET median loops (amber) overlaid on
