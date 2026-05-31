@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VULCAN-2D</title>
+  </head>
+  <body>
+    <div id="app">
+      <header id="topbar">
+        <div class="brand">
+          <span class="brand-mark">VULCAN&#8209;2D</span>
+          <span class="brand-sub">Layered-material memristor simulator · non-filamentary v0.2</span>
+        </div>
+        <div class="chips">
+          <span id="chip-engine" class="chip">engine…</span>
+          <span id="chip-cyc" class="chip">— cycles</span>
+          <span id="chip-fps" class="chip">— fps</span>
+        </div>
+      </header>
+
+      <main id="grid">
+        <!-- ===== Left: 3D device + structure controls ===== -->
+        <section class="col">
+          <div class="panel">
+            <div class="panel-head">
+              <span class="panel-title">Device · soft-breakdown patches</span>
+              <span class="panel-hint">drag to orbit</span>
+            </div>
+            <canvas id="device-canvas"></canvas>
+          </div>
+          <div class="controls">
+            <div class="ctrl">
+              <div class="ctrl-row"><label>h-BN layers</label><span id="layers-val" class="val">6</span></div>
+              <input id="layers" type="range" min="2" max="14" step="1" value="6" />
+              <div class="ctrl-foot"><span id="thick-val">2.00 nm</span></div>
+            </div>
+            <div class="ctrl">
+              <div class="ctrl-row"><label>Sub-populations K</label><span id="k-val" class="val">10</span></div>
+              <input id="k" type="range" min="4" max="24" step="1" value="10" />
+              <div class="ctrl-foot">areal patches</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== Right: I–V plot + validation readout + electrical controls ===== -->
+        <section class="col">
+          <div class="panel">
+            <div class="panel-head">
+              <span class="panel-title">I–V · model vs measured</span>
+              <span id="iv-hint" class="panel-hint"></span>
+            </div>
+            <canvas id="iv-canvas"></canvas>
+          </div>
+
+          <div id="feats" class="feats">
+            <div class="feat"><span class="feat-name">V_set</span><span id="f-vset" class="feat-val">—</span></div>
+            <div class="feat"><span class="feat-name">V_reset</span><span id="f-vreset" class="feat-val">—</span></div>
+            <div class="feat"><span class="feat-name">R_HRS</span><span id="f-rhrs" class="feat-val">—</span></div>
+            <div class="feat"><span class="feat-name">R_LRS</span><span id="f-rlrs" class="feat-val">—</span></div>
+            <div class="feat"><span class="feat-name">I_cc</span><span id="f-icc" class="feat-val">—</span></div>
+            <div class="feat"><span class="feat-name">window</span><span id="f-win" class="feat-val">—</span></div>
+          </div>
+
+          <div class="controls">
+            <div class="ctrl ctrl-wide">
+              <div class="ctrl-row"><label>Compliance I&#8202;<sub>cc</sub></label><span id="icc-val" class="val">51 µA</span></div>
+              <input id="icc" type="range" min="2" max="200" step="1" value="51" />
+            </div>
+            <div class="ctrl">
+              <div class="ctrl-row"><label>Variability σ</label><span id="sig-val" class="val">0.45</span></div>
+              <input id="sig" type="range" min="0" max="1.2" step="0.01" value="0.45" />
+            </div>
+            <div class="ctrl">
+              <div class="ctrl-row"><label>MC cycles</label><span id="cyc-val" class="val">14</span></div>
+              <input id="cyc" type="range" min="4" max="40" step="1" value="14" />
+            </div>
+            <button id="run" class="run-btn">Re-sample</button>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

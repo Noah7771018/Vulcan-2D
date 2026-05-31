@@ -1,0 +1,82 @@
+# ===========================================================================
+# VULCAN-2D .gitignore
+# ===========================================================================
+
+# --- OS / editor cruft ---
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# ---------------------------------------------------------------------------
+# Sensitive / unpublished research artifacts — keep OUT of version control.
+#   * The .xlsx are unpublished measurements from advisor 朱凯晨's group
+#     (linked to as-yet-unpublished / Nature-line work).
+#   * The proposal .docx contains personal information (phone numbers,
+#     student IDs, emails).
+# If this repo is kept PRIVATE and you deliberately want the data versioned,
+# remove the relevant lines below (and consider git-lfs for the big binaries).
+# ---------------------------------------------------------------------------
+*.xlsx
+*.opju
+*.docx
+微信图片_*.jpg
+
+# Bulk data directories (raw measurements, calibration sets, exports)
+data/
+raw/
+measurements/
+exports/
+
+# ---------------------------------------------------------------------------
+# Language / toolchain — kept stack-agnostic on purpose, since the simulator
+# implementation language is not locked in yet.
+# ---------------------------------------------------------------------------
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Node / web
+node_modules/
+dist/
+build/
+.next/
+.vite/
+*.local
+npm-debug.log*
+yarn-error.log*
+
+# Rust / WASM (if a compiled physics core is used)
+target/
+pkg/
+
+# Julia (if GLMakie/DifferentialEquations route is chosen)
+# Manifest.toml is usually committed for reproducibility — not ignored here.
+
+# Logs / scratch
+*.log
+tmp/
+scratch/
+
+# Local preview screenshots (not for git)
+preview_*.png
+
+# Packaging build artifacts
+engine-dist/
+engine-build/
+release/
+vulcan2d/measured_loops.json
+
+# Data-derived artifacts (unpublished measurements) — keep out of the repo.
+# Re-include them only if this repo is PRIVATE.
+analysis/figures/
+analysis/*.csv
+analysis/median_branches.npz
