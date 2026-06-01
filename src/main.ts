@@ -11,6 +11,8 @@ import './style.css';
 import { simulate, ping, type SimResult, type SimParams } from './engine';
 import { IVPlot, STYLE_MODEL, STYLE_DATA } from './viz/ivplot';
 import { Device3D } from './viz/device3d';
+import { applyTranslations, t } from './i18n';
+import { Settings } from './settings';
 
 const $ = <T extends HTMLElement>(id: string): T => {
   const el = document.getElementById(id);
@@ -59,16 +61,16 @@ function params(): SimParams {
 async function runSim() {
   if (pending) return;
   pending = true;
-  ivHint.textContent = 'computing…';
+  ivHint.textContent = t('computing');
   try {
     const r = await simulate(params());
     applyResult(r);
-    chipEngine.textContent = 'engine ✓';
+    chipEngine.textContent = t('engine-ok');
     chipEngine.className = 'chip up';
   } catch (e) {
-    chipEngine.textContent = 'engine offline';
+    chipEngine.textContent = t('engine-offline');
     chipEngine.className = 'chip down';
-    ivHint.textContent = 'start: python -m vulcan2d.serve';
+    ivHint.textContent = t('start-hint');
   } finally {
     pending = false;
   }
@@ -185,8 +187,15 @@ function animate(now: number) {
 syncLabels();
 applyGeometry();
 onResize();
+
+const settings = new Settings();
+const settingsContainer = $('settings-container');
+settingsContainer.appendChild(settings.getElement());
+
+applyTranslations();
+
 ping().then((up) => {
-  chipEngine.textContent = up ? 'engine ✓' : 'engine offline';
+  chipEngine.textContent = up ? t('engine-ok') : t('engine-offline');
   chipEngine.className = up ? 'chip up' : 'chip down';
 });
 requestAnimationFrame(animate);
