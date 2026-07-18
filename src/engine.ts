@@ -1,6 +1,6 @@
 // ============================================================================
 //  Engine client — talks to the Python VULCAN-2D model server (vulcan2d.serve).
-//  The validated physics lives in Python; the UI fetches simulated I-V loops,
+//  The calibrated model lives in Python; the UI fetches simulated I-V loops,
 //  the measured-data overlay, the phi_bar trajectory, and summary features.
 // ============================================================================
 

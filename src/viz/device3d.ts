@@ -1,10 +1,11 @@
 // ============================================================================
-//  Device view — NON-FILAMENTARY soft-breakdown (faithful to the v0.2 model).
+//  Device view - distributed soft-breakdown representation for v0.3.
 //
 //  The h-BN area is K parallel sub-populations ("patches"). As the breakdown
 //  fraction phi_bar rises during SET, patches cross a spread of thresholds and
-//  light up progressively ACROSS THE AREA — not a single filament. This is the
-//  non-filamentary diagnostic the Nature paper (and the model) describe.
+//  light up progressively across the area. A patch is a coarse-grained local
+//  region, not a literal filament geometry; it can represent a defect bridge,
+//  a metal-assisted confined path, or a CAFM hotspot.
 //
 //  Glow uses unlit basic materials + additive halos (no HDR bloom): renders the
 //  same warm orange on every GPU (a software-renderer pink artifact bit us once).

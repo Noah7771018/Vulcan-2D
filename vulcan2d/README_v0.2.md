@@ -1,5 +1,9 @@
 # VULCAN-2D v0.2 — non-filamentary device model for the h-BN 1T1M memristor
 
+> Historical document. The current corrected model is
+> [README_v0.3.md](README_v0.3.md); do not use the v0.2 validation values as the
+> current result.
+
 A device-level physical model that reproduces the measured 1T1M I–V loops and
 their cycle-to-cycle (C2C) statistics, with physics faithful to the **non-
 filamentary** soft-breakdown switching of multilayer h-BN (Zhu/Lanza, *Nature*

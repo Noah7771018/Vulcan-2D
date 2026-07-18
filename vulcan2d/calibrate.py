@@ -1,120 +1,110 @@
-"""Ordered calibration of VULCAN-2D v0.2 to the measured 1T1M targets.
+"""Persist and audit the jointly calibrated VULCAN-2D v0.3 profile.
 
-Follows the design's calibration plan: fix transport, then pin each macroscopic
-target with ONE knob via 1-D bisection / proportional update, in an order chosen
-so later steps don't disturb earlier ones.  Writes vulcan2d_calibrated.npz.
+The electrical levels, stochastic widths, and endurance slopes are coupled.  A
+naive sequence of one-parameter bisections can match each target temporarily and
+then undo it when drift is enabled.  The Params defaults therefore hold the
+joint profile obtained from a multi-seed coordinate search against all 53
+measured cycles. This command reports the median and 10-90% interval across 12
+independent 53-cycle C2C sequences and writes ``vulcan2d_calibrated.npz``.
+
+Only quantities identifiable from the available quasi-static, single-device
+data are active.  The thermal term remains disabled until variable-temperature
+or pulse-width data are available.
 """
 import os
 import numpy as np
-from math import gamma
 from . import model as M
 from . import features as F
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-TARGET = dict(Vset=1.298, Vset_cv=25.2, Vreset=-1.075, Vreset_cv=24.3,
-              R_HRS=2.045e8, sigma_lnR_HRS=0.521, R_LRS=2.939e5, R_LRS_cv=28.4,
-              Icc=5.146e-5, window=600.0)
+AUDIT_SEEDS = tuple(range(100, 112))
+
+TARGET = dict(
+    Vset=1.298, Vset_cv=25.0,
+    Vreset=-1.075, Vreset_cv=24.1,
+    R_HRS=2.045e8, R_HRS_cv=45.5,
+    R_LRS=2.939e5, R_LRS_cv=28.4,
+    Icc=5.146e-5, Icc_cv=1.0,
+    window=667.6,
+    Vset_slope=8.524e-3,
+    lnR_HRS_slope=-1.177e-2,
+    lnR_LRS_slope=6.931e-3,
+)
 
 
-SEED = 2026   # single physical cell -> one frozen structure throughout
+def slope(values, log=False):
+    y = np.asarray(values, float)
+    if log:
+        y = np.log(np.clip(y, 1e-30, None))
+    x = np.arange(len(y), dtype=float)
+    ok = np.isfinite(y)
+    return np.polyfit(x[ok], y[ok], 1)[0]
 
 
-def run(p, n=40, seed=SEED):
-    cyc, _ = M.simulate_cycles(p, n_cycles=n, seed=seed)
-    return F.extract_all(cyc)
+def cv(values):
+    x = np.asarray(values, float)
+    x = x[np.isfinite(x)]
+    return np.std(x) / abs(np.mean(x)) * 100
 
 
-def feat(df, col):
-    return F.summary(df, col)
+def sequence_stats(p, seed):
+    cycles, _ = M.simulate_cycles(p, n_cycles=53, seed=seed)
+    df = F.extract_all(cycles)
+    return dict(
+        Vset_mean=np.mean(df.Vset), Vset_cv=cv(df.Vset),
+        Vreset_mean=np.mean(df.Vreset), Vreset_cv=cv(df.Vreset),
+        R_HRS_mean=np.mean(df.R_HRS), R_HRS_cv=cv(df.R_HRS),
+        R_LRS_mean=np.mean(df.R_LRS), R_LRS_cv=cv(df.R_LRS),
+        Icc_mean=np.mean(df.Icc), Icc_cv=cv(df.Icc),
+        window=np.median(df.R_HRS / df.R_LRS),
+        Vset_slope=slope(df.Vset),
+        lnR_HRS_slope=slope(df.R_HRS, log=True),
+        lnR_LRS_slope=slope(df.R_LRS, log=True),
+    )
 
 
-def bisect_knob(p, attr, target, getter, lo, hi, iters=11, n=24, tol=0.015,
-                increasing=True):
-    """Bisect Params.attr in [lo,hi] so getter(run(p))==target.
-    increasing=True means getter rises with attr."""
-    val = np.nan
-    for _ in range(iters):
-        mid = 0.5 * (lo + hi)
-        setattr(p, attr, mid)
-        val = getter(run(p, n=n))
-        if abs(val - target) / (abs(target) + 1e-12) < tol:
-            break
-        if (val > target) == increasing:
-            hi = mid
-        else:
-            lo = mid
-    return getattr(p, attr), val
-
-
-def cv_from_m(m):
-    return np.sqrt(gamma(1 + 2 / m) / gamma(1 + 1 / m) ** 2 - 1) * 100
+def audit(p, seeds=AUDIT_SEEDS):
+    records = [sequence_stats(p, seed) for seed in seeds]
+    return {key: np.array([record[key] for record in records], float)
+            for key in records[0]}
 
 
 def main():
     p = M.Params()
-    print("VULCAN-2D v0.2 calibration")
-    print("-" * 60)
+    result = audit(p)
 
-    # ---- structural params FIRST (threshold calibration last, undisturbed) ----
-    # STEP 1: Weibull shapes for the switching-voltage CVs (analytic)
-    for attr, key in [("m_set", "Vset_cv"), ("m_reset", "Vreset_cv")]:
-        ms = np.linspace(2, 12, 400)
-        cvs = np.array([cv_from_m(m) for m in ms])
-        setattr(p, attr, float(ms[np.argmin(np.abs(cvs - TARGET[key]))]))
-    print(f"STEP1 m_set={p.m_set:.2f} (CV {cv_from_m(p.m_set):.1f}%) "
-          f"m_reset={p.m_reset:.2f} (CV {cv_from_m(p.m_reset):.1f}%)")
+    print("VULCAN-2D v0.3 multi-seed calibration audit")
+    print("MODEL = median across 12 independent 53-cycle C2C sequences")
+    print("-" * 80)
+    print(f"{'feature':14s}{'MODEL median':>15s}{'MODEL CV':>10s} | "
+          f"{'DATA mean':>13s}{'DATA CV':>9s}")
+    rows = [
+        ("V_set (V)", "Vset", TARGET["Vset"], TARGET["Vset_cv"]),
+        ("V_reset (V)", "Vreset", TARGET["Vreset"], TARGET["Vreset_cv"]),
+        ("R_HRS (Ohm)", "R_HRS", TARGET["R_HRS"], TARGET["R_HRS_cv"]),
+        ("R_LRS (Ohm)", "R_LRS", TARGET["R_LRS"], TARGET["R_LRS_cv"]),
+        ("I_cc (A)", "Icc", TARGET["Icc"], TARGET["Icc_cv"]),
+    ]
+    for name, key, target_mean, target_cv in rows:
+        print(f"{name:14s}{np.median(result[key + '_mean']):>15.3e}"
+              f"{np.median(result[key + '_cv']):>9.1f}% | "
+              f"{target_mean:>13.3e}{target_cv:>8.1f}%")
 
-    # STEP 2: sigma_lnG -> sigma_lnR_HRS (lognormal-R width; shape emergent)
-    v, got = bisect_knob(p, "sigma_lnG", TARGET["sigma_lnR_HRS"],
-                         lambda df: feat(df, "R_HRS")["sigma_ln"], 0.2, 1.4)
-    print(f"STEP2 sigma_lnG={v:.3f} -> sigma_lnR_HRS={got:.3f}")
+    print(f"{'window':14s}{np.median(result['window']):>15.0f}{'':>10s} | "
+          f"{TARGET['window']:>13.0f}")
+    print("\nendurance slopes, median (model | data):")
+    print(f"  V_set       {np.median(result['Vset_slope']):+.4g} | "
+          f"{TARGET['Vset_slope']:+.4g} V/cycle")
+    print(f"  ln R_HRS    {np.median(result['lnR_HRS_slope']):+.4g} | "
+          f"{TARGET['lnR_HRS_slope']:+.4g} /cycle")
+    print(f"  ln R_LRS    {np.median(result['lnR_LRS_slope']):+.4g} | "
+          f"{TARGET['lnR_LRS_slope']:+.4g} /cycle")
+    print("\n10-90% intervals of sequence-level means:")
+    for key in ("Vset_mean", "Vreset_mean", "R_HRS_mean", "R_LRS_mean", "Icc_mean"):
+        lo, hi = np.percentile(result[key], [10, 90])
+        print(f"  {key:14s} [{lo:.4g}, {hi:.4g}]")
+    print("\nthermal feedback: disabled (Rth=0; not identifiable from current data)")
 
-    # STEP 3: I_s -> R_HRS MEAN. NB sigma_lnG (STEP2) shifts the lognormal mean
-    # via E[exp(lng)]=exp(sigma^2/2), so I_s is pinned AFTER sigma_lnG to absorb it.
-    v, got = bisect_knob(p, "I_s", TARGET["R_HRS"],
-                         lambda df: feat(df, "R_HRS")["mean"], 3e-10, 1.2e-9,
-                         increasing=False)
-    print(f"STEP3 I_s={v:.3e} -> R_HRS={got:.2e}")
-
-    # STEP 4a: Gon -> R_LRS mean (LRS = transistor R_on + h-BN series)
-    v, got = bisect_knob(p, "Gon", TARGET["R_LRS"],
-                         lambda df: feat(df, "R_LRS")["mean"], 5e2, 6e3,
-                         increasing=False)
-    print(f"STEP4a Gon={v:.0f} -> R_LRS={got:.2e}")
-    # STEP 4b: sigma_Gon -> R_LRS CV (per-cycle breakdown-config spread; LRS-only)
-    v, got = bisect_knob(p, "sigma_Gon", TARGET["R_LRS_cv"],
-                         lambda df: feat(df, "R_LRS")["cv"], 0.0, 1.2)
-    print(f"STEP4b sigma_Gon={v:.3f} -> R_LRS CV={got:.1f}%")
-    # STEP 4c: re-pin R_LRS mean (sigma_Gon lifts the lognormal mean)
-    v, got = bisect_knob(p, "Gon", TARGET["R_LRS"],
-                         lambda df: feat(df, "R_LRS")["mean"], 5e2, 8e3,
-                         increasing=False)
-    print(f"STEP4c Gon={v:.0f} -> R_LRS={got:.2e} (CV {feat(run(p),'R_LRS')['cv']:.0f}%)")
-
-    # ---- threshold means LAST (structural params now fixed) ----
-    # STEP 5: bisect SET threshold mean -> applied V_set mean
-    v, got = bisect_knob(p, "Vth_set0", TARGET["Vset"],
-                         lambda df: feat(df, "Vset")["mean"], 0.6, 2.4)
-    print(f"STEP5 Vth_set0={v:.3f} -> V_set={got:.3f}")
-
-    # STEP 6: bisect RESET threshold mean -> applied |V_reset|
-    v, got = bisect_knob(p, "Vth_reset0", abs(TARGET["Vreset"]),
-                         lambda df: -feat(df, "Vreset")["mean"], 0.3, 1.8)
-    print(f"STEP6 Vth_reset0={v:.3f} -> |V_reset|={got:.3f}")
-
-    # final report
-    df = run(p, n=53, seed=2026)
-    print("-" * 60)
-    print(f"{'feature':10s}{'MODEL':>14s}{'CV%':>8s} | {'TARGET':>12s}")
-    rows = [("Vset", "Vset", "mean"), ("Vreset", "Vreset", "mean"),
-            ("R_HRS", "R_HRS", "mean"), ("R_LRS", "R_LRS", "mean"),
-            ("Icc", "Icc", "mean")]
-    for name, col, _ in rows:
-        s = feat(df, col)
-        tk = name if name in TARGET else None
-        print(f"{name:10s}{s['mean']:>14.3e}{s['cv']:>7.1f}% | "
-              f"{TARGET.get(name, float('nan')):>12.3e}")
-    print(f"window {np.nanmedian(df.R_HRS/df.R_LRS):.0f} (target ~600)")
     out = os.path.join(HERE, "vulcan2d_calibrated.npz")
     p.to_npz(out)
     print("saved", out)

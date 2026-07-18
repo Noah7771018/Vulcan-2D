@@ -28,6 +28,10 @@ raw/
 measurements/
 exports/
 
+# Local literature archives (large third-party PDFs, not project source)
+SIM2RRAM/
+references/
+
 # ---------------------------------------------------------------------------
 # Language / toolchain — kept stack-agnostic on purpose, since the simulator
 # implementation language is not locked in yet.

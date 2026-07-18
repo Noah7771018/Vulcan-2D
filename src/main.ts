@@ -1,9 +1,9 @@
 // ============================================================================
 //  VULCAN-2D — application entry / orchestration.
 //
-//  The validated physics runs in the Python engine (vulcan2d.serve); this UI
+//  The calibrated model runs in the Python engine (vulcan2d.serve); this UI
 //  fetches simulated + measured I-V loops and drives:
-//    · left  — the non-filamentary 3D device (patches light up with phi_bar),
+//    · left  — the distributed-path 3D device (patches light up with phi_bar),
 //    · right — the model-vs-measured I-V overlay + a validation readout.
 // ============================================================================
 
@@ -44,7 +44,7 @@ const ivHint = $('iv-hint');
 const device = new Device3D(deviceCanvas);
 const plot = new IVPlot(ivCanvas, -2, 5);
 
-let seed = 2026;
+let seed = 110;
 let needsSim = true;
 let pending = false;
 

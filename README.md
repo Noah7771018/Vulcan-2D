@@ -2,12 +2,13 @@
 
 **V**ariability-aware **U**nified simulator for **L**ayered-material **C**onduction **AN**alysis.
 
-A device-level physical simulator for **2D-material memristors** (h-BN 1T1M), with an
-interactive 3D UI. The physics is a validated **non-filamentary soft-breakdown** model
-(faithful to Zhu/Lanza, *Nature* 618, 57–62, 2023): the h-BN area is K parallel
-sub-populations ("patches") that soft-break progressively, in series with the 1T
-transistor (load-line divider). It reproduces the measured I–V loops and their
-cycle-to-cycle statistics, and shows the **experiment ↔ simulation** overlay live.
+A reduced-order device simulator for **2D-material memristors** (h-BN 1T1M), with an
+interactive 3D UI. Its calibrated **distributed soft-breakdown** model follows the
+progressive switching picture reported by Zhu/Lanza, *Nature* 618, 57-62 (2023): the
+h-BN area is represented by K parallel sub-populations ("patches") in series with the
+1T transistor. A patch can coarse-grain an intrinsic defect bridge, a metal-assisted
+confined path, or a local hotspot; the electrical data do not uniquely select among
+them. The model reproduces this cell's measured I-V loops and cycle-to-cycle statistics.
 
 > Fudan University FDUROP 曦源项目. Advisor: 朱凯晨 (Zhu Kaichen). The model is calibrated
 > against the group's hybrid 2D/CMOS h-BN 1T1M measurements (`1T1M写入/擦除.xlsx`).
@@ -20,11 +21,11 @@ Two processes during development:
 ┌─────────────────────────┐        HTTP /simulate        ┌──────────────────────────┐
 │  Python engine           │ ───────────────────────────▶ │  TypeScript + Three.js UI │
 │  vulcan2d/  (validated    │   model + measured I-V loops │  (Vite / Electron)        │
-│  non-filamentary model)   │ ◀───────────────────────────  │  3D device + I-V plot     │
+│  distributed-path model)  │ ◀───────────────────────────  │  3D device + I-V plot     │
 └─────────────────────────┘                               └──────────────────────────┘
 ```
 
-The validated physics stays in Python (`vulcan2d/`, where the model research happens); the
+The calibrated model stays in Python (`vulcan2d/`, where the model research happens); the
 UI fetches simulated + measured loops and renders them. (A later step can port the model
 into TypeScript for a single double-click desktop binary.)
 
@@ -75,19 +76,33 @@ Notes for recipients:
 - **I–V · model vs measured** — the model's SET / RESET median loops (amber) overlaid on
   the measured cell (grey), with a 10–90% variability band. The validation readout below
   shows V_set, V_reset, R_HRS, R_LRS, I_cc and the memory window, model / data.
-- **3D device · soft-breakdown patches** — K areal patches that light up progressively as
-  φ̄ rises during SET (non-filamentary; **not** a single conductive filament). The patch
-  count tracks K; orbit to inspect, adjust h-BN layers.
+- **3D device · soft-breakdown patches** — K coarse-grained local regions that light up
+  progressively as φ̄ rises during SET. They are not a literal count or geometry of
+  filaments; each can represent a defect bridge, metal-assisted path, or CAFM hotspot.
 - **Live controls** — compliance I_cc, sub-populations K, variability σ, MC cycles,
   re-sample. Each re-queries the engine.
 
 ## The model (`vulcan2d/`)
 
-See [vulcan2d/README_v0.2.md](vulcan2d/README_v0.2.md) for the physics, the honest
-emergent-vs-calibrated split, and the validation table. Reproduce the validation figure:
+See [vulcan2d/README_v0.3.md](vulcan2d/README_v0.3.md) for the equations and validation,
+and [analysis/MODEL_REVIEW_2026-07-14.md](analysis/MODEL_REVIEW_2026-07-14.md) for the
+reliability review. The paper-ready derivation and evidence grading are in
+[analysis/LITERATURE_THEORY_REVIEW_2026-07-14.md](analysis/LITERATURE_THEORY_REVIEW_2026-07-14.md),
+with citations in [references/vulcan2d_theory.bib](references/vulcan2d_theory.bib).
+The advisor's proposed 1R/1T1R--CAFM--XTEM--atomistic paper logic is mapped in
+[analysis/PAPER_EVIDENCE_CHAIN_2026-07-14.md](analysis/PAPER_EVIDENCE_CHAIN_2026-07-14.md).
+The focused Zhu Kaichen/Mario Lanza h-BN literature audit, two-regime mechanism,
+and testable predictions are in
+[analysis/ZHU_LANZA_HBN_PHYSICS_REVIEW_2026-07-15.md](analysis/ZHU_LANZA_HBN_PHYSICS_REVIEW_2026-07-15.md).
+The newly added sputtered h-BN CAFM current maps and 4,866-spot projected-area
+distribution are analyzed in
+[analysis/AFM_DATA_REVIEW_2026-07-14.md](analysis/AFM_DATA_REVIEW_2026-07-14.md),
+with a reproducible parser and figure in `analysis/analyze_afm_spots.py`.
+Reproduce the validation figure:
 
 ```bash
-npm run engine   # (or:)  $VULCAN_PY -m vulcan2d.validate
+$VULCAN_PY -m vulcan2d.calibrate
+$VULCAN_PY -m vulcan2d.validate
 ```
 
 ## Project layout
@@ -95,5 +110,5 @@ npm run engine   # (or:)  $VULCAN_PY -m vulcan2d.validate
 - `vulcan2d/` — the validated Python model + `serve.py` (engine HTTP server).
 - `analysis/` — data exploration, feature extraction, figures.
 - `src/` — the TypeScript UI: `engine.ts` (model client), `viz/ivplot.ts` (I–V overlay),
-  `viz/device3d.ts` (non-filamentary 3D), `main.ts`.
+  `viz/device3d.ts` (distributed-path 3D), `main.ts`.
 - See [CLAUDE.md](CLAUDE.md) for the full architecture.

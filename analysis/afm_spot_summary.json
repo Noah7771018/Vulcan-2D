@@ -1,0 +1,53 @@
+{
+  "source_file": "/Users/fanxiang/Vulcan-2D Latest/AFM/Conductive spot size distributions defect for sputter hBN.txt",
+  "data_semantics": {
+    "column_1": "projected conductive-spot area in square metres",
+    "column_2": "number of segmented spots in that area bin",
+    "equivalent_diameter_formula": "d_eq = 2*sqrt(A/pi)"
+  },
+  "scan_assumption": {
+    "width_um": 5.0,
+    "height_um": 5.0,
+    "basis": "nominal size inferred from the 1 um scale bar in slide 2"
+  },
+  "spot_count": 4866,
+  "nonzero_bins": 21,
+  "total_projected_area_um2": 13.092956434200001,
+  "apparent_spot_density_per_um2": 194.64,
+  "apparent_projected_area_fraction": 0.523718257368,
+  "area_nm2": {
+    "mean": 2690.7021032059192,
+    "mode": 1759.4276,
+    "percentiles": {
+      "10": 1759.4276,
+      "25": 1759.4276,
+      "50": 1759.4276,
+      "75": 3166.9697,
+      "90": 4574.5118,
+      "95": 5982.053800000001,
+      "99": 12315.993
+    }
+  },
+  "equivalent_diameter_nm": {
+    "mean": 55.92543790605586,
+    "mode": 47.33046372494653,
+    "percentiles": {
+      "10": 47.33046372494653,
+      "25": 47.33046372494653,
+      "50": 47.33046372494653,
+      "75": 63.50048077784967,
+      "90": 76.31807991306928,
+      "95": 87.27306260750365,
+      "99": 125.22463543680794
+    }
+  },
+  "count_fraction_below_diameter": {
+    "50_nm": 0.7055076037813399,
+    "75_nm": 0.8604603370324702,
+    "100_nm": 0.9730785039046445
+  },
+  "area_heterogeneity": {
+    "coefficient_of_variation": 0.8602798467873399,
+    "effective_spot_count": 2796.4208793021253
+  }
+}

@@ -1,10 +1,10 @@
-"""VULCAN-2D engine server — exposes the validated v0.2 model to the UI.
+"""VULCAN-2D engine server exposing the calibrated v0.3 model to the UI.
 
 A tiny stdlib HTTP server (no extra deps). GET /simulate runs an N-cycle Monte
 Carlo of the calibrated model with optional UI parameter overrides and returns:
   * model SET / RESET median I-V loops (+ 10-90% bands),
   * the MEASURED median loops (from the xlsx) for the experiment<->simulation overlay,
-  * the progressive phi_bar(V) trajectory (drives the non-filamentary 3D view),
+  * the progressive phi_bar(V) trajectory (drives the distributed-path 3D view),
   * summary features (V_set, V_reset, R_HRS, R_LRS, I_cc, window) vs data targets.
 
 Run:  <python-with-numpy/scipy/pandas> -m vulcan2d.serve   (default port 8000)
@@ -12,6 +12,7 @@ Run:  <python-with-numpy/scipy/pandas> -m vulcan2d.serve   (default port 8000)
 import json
 import os
 import sys
+from math import gamma, sqrt
 from urllib.parse import urlparse, parse_qs
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import numpy as np
@@ -87,6 +88,25 @@ def _collect_features(cyc):
     return {k: np.array([r.get(k, np.nan) for r in rows], float) for k in keys}
 
 
+def _scale_weibull_shape(shape, width_scale):
+    """Return the Weibull shape whose CV is the baseline CV times width_scale."""
+    def wcv(value):
+        g1 = gamma(1.0 + 1.0 / value)
+        return sqrt(gamma(1.0 + 2.0 / value) / (g1 * g1) - 1.0)
+
+    target = wcv(shape) * max(width_scale, 0.0)
+    if target < 1e-6:
+        return 1e6
+    lo, hi = 0.25, 1e4
+    for _ in range(60):
+        mid = 0.5 * (lo + hi)
+        if wcv(mid) > target:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
+
+
 def _apply_overrides(p, q):
     def fval(name):
         v = q.get(name, [None])[0]
@@ -99,10 +119,13 @@ def _apply_overrides(p, q):
     if K is not None:
         p.K = max(2, int(float(K)))
     sigma = fval("sigma")
-    if sigma is not None:                     # one knob -> the calibrated C2C widths
+    if sigma is not None:                     # one knob -> calibrated stochastic widths
         r = sigma / SIGMA_UI_DEFAULT
-        p.sigma_lnG = 0.52 * r
-        p.sigma_theta = 0.16 * r
+        p.sigma_lnG *= r
+        p.sigma_Gon *= r
+        p.sigma_theta *= r
+        p.m_set = _scale_weibull_shape(p.m_set, r)
+        p.m_reset = _scale_weibull_shape(p.m_reset, r)
     vset = fval("vset")
     if vset is not None:
         p.Vth_set0 = vset
@@ -113,7 +136,7 @@ def simulate(q):
     p = M.Params.from_npz(CAL)
     p = _apply_overrides(p, q)
     ncyc = int(float(q.get("ncycles", ["14"])[0]))
-    seed = int(float(q.get("seed", ["2026"])[0]))
+    seed = int(float(q.get("seed", ["110"])[0]))
     cyc, _ = M.simulate_cycles(p, n_cycles=ncyc, seed=seed)
     feat = _collect_features(cyc)
 
@@ -164,7 +187,7 @@ class Handler(BaseHTTPRequestHandler):
                 traceback.print_exc()
                 self._send(500, json.dumps({"error": str(e)}))
         elif u.path in ("/", "/health"):
-            self._send(200, json.dumps({"ok": True, "engine": "vulcan2d v0.2"}))
+            self._send(200, json.dumps({"ok": True, "engine": "vulcan2d v0.3"}))
         else:
             self._send(404, json.dumps({"error": "not found"}))
 
